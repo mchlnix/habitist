@@ -26,7 +26,7 @@ class HabiticaHelper:
             if tag["name"] == tag_name:
                 return tag["id"]
         else:
-            resp = r.post( "https://habitica.com/api/v3/tags", headers=self.headers, data={"name": tag_name} )
+            resp = r.post( "https://habitica.com/api/v3/tags", headers=self.headers, json={"name": tag_name} )
             return self.get_tag_id_by_name( tag_name, use_cache=False )
         
     '''
@@ -42,7 +42,7 @@ class HabiticaHelper:
     Returns the task id.
     '''
     def upload_task( self, task ):
-        resp = r.post( "https://habitica.com/api/v3/tasks/user", headers=self.headers, data=task )
+        resp = r.post( "https://habitica.com/api/v3/tasks/user", headers=self.headers, json=task )
 
         return resp.json()["data"]["id"]
 
@@ -73,7 +73,7 @@ class HabiticaHelper:
     Returns response as json.
     '''
     def update_task( self, habit_id, task ):
-        resp = r.put( "https://habitica.com/api/v3/tasks/" + str(habit_id), headers=self.headers, data=task )
+        resp = r.put( "https://habitica.com/api/v3/tasks/" + str(habit_id), headers=self.headers, json=task )
 
         return resp.json()[data]
 
@@ -88,7 +88,7 @@ class HabiticaHelper:
         return 
 
     def upload_checklist_item( self, task, checklist_id ):
-        resp = r.post("https://habitica.com/api/v3/tasks/%s/checklist" % checklist_id, headers=self.headers, data=task )
+        resp = r.post("https://habitica.com/api/v3/tasks/%s/checklist" % checklist_id, headers=self.headers, json=task )
 
         return
 
