@@ -1,10 +1,12 @@
-
+import re
 
 class Item:
     def __init__( self, api, h_helper, item_id ):
         self.is_repeating = False
         self.is_checklist = False
         self.is_checklist_item = False
+        self.type = "todo"
+
         self.h_helper = h_helper
         self.api = api
 
@@ -22,6 +24,7 @@ class Item:
         self.collapsed     = _item["collapsed"]
         self.priority      = _item["priority"]
         self.completed     = _item["checked"] == 1
+        self.date_string   = _item["date_string"].lower()
 
         self.tags = [ self.h_helper.get_tag_id_by_name( "p:" + self.api.projects.get_by_id(_item["project_id"])["name"]) ]
 
@@ -34,17 +37,92 @@ class Item:
         #     self.notes += note["content"]
         #     self.notes += "\n\n"
 
+        self.repeats_on = {}
+
+        self._check_for_repeating()
+
         self.task = {}
 
         self.task["text"] = self.content
         self.task["date"] = self.h_helper.date_t_to_h( self.due_date )
         self.task["tags"] = self.tags
         self.task["completed"] = self.completed
-        self.task["type"] = "todo"
+        self.task["type"] = self.type
         self.task["dateCreated"] = self.creation_date
 
     def _check_for_repeating( self ):
-        pass
+        self.type = "todo"
+
+        if not self.date_string:
+            self.is_repeating = False
+            return
+
+        for word, num in zip(
+                ["first", "second", "third", "fourth", "fifth",
+                 "sixth", "seventh", "eighth", "ninth", "tenth"],
+                ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th"] ):
+            self.date_string = self.date_string.replace( word, num )
+
+        self.repeats_on = {}
+
+        # build the regex for yearly tasks
+        ev_yrly  = "(yearly|ev(ery)?( year)?)"
+        ev_mthly = "(monthly|ev(ery)?( month)?)"
+        on       = "( on)?"
+        the_xth  = "(( the)? \\d+(st|nd|rd|th)?)"
+        of       = "( of)?"
+        month    = "( (jan(uary)?|feb(ruary)?|mar(ch)?|apr(il)?|may|jun(e)?" + \
+        "|jul(y)?|aug(ust)?|sep(t)?(ember)?|oct(ober)?|nov(ember)?|dec(ember)?))"
+        day      = "( mon(day)?|tue(s(day)?)?|wed(nesday)?|thu(r(s(day)?)?)?" + \
+                   "|fri(day)?|sat(urday)?|sun(day)?)"
+        re_or    = "|"
+        decimals = " \d+"
+        stop     = "$"
+
+        yrly_re = re.compile(ev_yrly + on + the_xth + "?" + of + month + the_xth + "?" + re_or + ev_yrly + decimals + stop, re.IGNORECASE ) # https://regex101.com/r/xUnNAT/10
+
+        # build the regex for monthly tasks
+        mthly_re = re.compile( ev_mthly + "(" + on + the_xth + day + "?" + re_or + day + the_xth+ ")"); # https://regex101.com/r/UoiLVm/5
+
+        # get yearlies
+        if self.date_string == "yearly" or self.date_string == "every year" or re.match( yrly_re, self.date_string ):
+            print( self.content + " is yearly with " + self.date_string )
+            self.is_repeating = True
+            return
+
+        # get monthlies
+        if self.date_string == "monthly" or self.date_string == "every month" or re.match(mthly_re, self.date_string ):
+            print( self.content + " is monthly with " + self.date_string )
+            self.is_repeating = True
+            return
+
+        # get dailies TODO  renew!
+        noStartDate = not re.match( "(after|starting|last|\d+(st|nd|rd|th)|(first|second|third))", self.date_string, re.IGNORECASE )
+
+        needToParse = re.match( "^ev(ery)? [^\d]", self.date_string, re.IGNORECASE) or self.date_string == "daily"
+
+        if needToParse and noStartDate:
+            print( self.content + " is daily/weekly with " + self.date_string )
+
+            self.type = 'daily'
+            self.is_repeating = True
+
+            everyday = ( re.match("^ev(ery)? [^(week)]?(?:day|night)", self.date_string, re.IGNORECASE) or self.date_string == "daily")
+            weekday = (re.match("^ev(ery)? (week)?day", self.date_string, re.IGNORECASE))
+            weekend = (re.match("^ev(ery)? (week)?end", self.date_string, re.IGNORECASE))
+
+            self.repeats_on = {
+                "su": everyday or weekend or re.match("\bs($| |,|u)", self.date_string, re.IGNORECASE ),
+                "s":  everyday or weekend or re.match("\bsa($| |,|t)", self.date_string, re.IGNORECASE),
+                "f":  everyday or weekday or re.match("\bf($| |,|r)", self.date_string, re.IGNORECASE),
+                "th": everyday or weekday or re.match("\bth($| |,|u)", self.date_string, re.IGNORECASE),
+                "w":  everyday or weekday or (re.match("\bw($| |,|e)", self.date_string, re.IGNORECASE) and not weekend), # Otherwise also matches weekend
+                "t":  everyday or weekday or re.match("\bt($| |,|u)", self.date_string, re.IGNORECASE),
+                "m":  everyday or weekday or re.match("\bm($| |,|o)", self.date_string, re.IGNORECASE)
+            }
+
+        if not self.is_repeating:
+            print( self.content + " did not match anything with " + self.date_string )
 
     def sync_with_habitrpg( self ):
         if habitrpg == 0:
@@ -61,7 +139,7 @@ class Item:
             self.h_helper.update_task( self.habit_id, self.task )
 
     def delete_from_habitrpg( self ):
-        if self.habit_id == 0: 
+        if self.habit_id == 0:
             return
 
         self.h_helper.delete_task( self.habit_id )
