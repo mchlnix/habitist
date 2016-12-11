@@ -8,6 +8,7 @@ class Item:
         self.is_checklist_item = False
         self.parent = item_id
         self.type = "todo"
+        self.repeats_on = {}
 
         self.h_helper = h_helper
         self.api = api
@@ -68,10 +69,12 @@ class Item:
         self.task["completed"] = self.completed
         self.task["type"] = self.type
         self.task["dateCreated"] = self.creation_date
+        self.task["repeat"] = self.repeats_on
 
 
     def _check_for_repeating( self ):
         self.type = "todo"
+        self.repeats_on = {}
 
         if not self.date_string:
             self.is_repeating = False
@@ -127,18 +130,18 @@ class Item:
             self.type = 'daily'
             self.is_repeating = True
 
-            everyday = ( re.match("^ev(ery)? [^(week)]?(?:day|night)", self.date_string, re.IGNORECASE) or self.date_string == "daily")
-            weekday = (re.match("^ev(ery)? (week)?day", self.date_string, re.IGNORECASE))
-            weekend = (re.match("^ev(ery)? (week)?end", self.date_string, re.IGNORECASE))
+            everyday = bool( re.match("^ev(ery)? [^(week)]?(?:day|night)", self.date_string, re.IGNORECASE) or self.date_string == "daily")
+            weekday = bool(re.match("^ev(ery)? (week)?day", self.date_string, re.IGNORECASE))
+            weekend = bool(re.match("^ev(ery)? (week)?end", self.date_string, re.IGNORECASE))
 
             self.repeats_on = {
-                "su": everyday or weekend or re.match("\bs($| |,|u)", self.date_string, re.IGNORECASE ),
-                "s":  everyday or weekend or re.match("\bsa($| |,|t)", self.date_string, re.IGNORECASE),
-                "f":  everyday or weekday or re.match("\bf($| |,|r)", self.date_string, re.IGNORECASE),
-                "th": everyday or weekday or re.match("\bth($| |,|u)", self.date_string, re.IGNORECASE),
-                "w":  everyday or weekday or (re.match("\bw($| |,|e)", self.date_string, re.IGNORECASE) and not weekend), # Otherwise also matches weekend
-                "t":  everyday or weekday or re.match("\bt($| |,|u)", self.date_string, re.IGNORECASE),
-                "m":  everyday or weekday or re.match("\bm($| |,|o)", self.date_string, re.IGNORECASE)
+                "su": bool( everyday or weekend or re.search("\\bs($| |,|u)", self.date_string, re.IGNORECASE )),
+                "s":  bool( everyday or weekend or re.search("\\bsa($| |,|t)", self.date_string, re.IGNORECASE)),
+                "f":  bool( everyday or weekday or re.search("\\bf($| |,|r)", self.date_string, re.IGNORECASE)),
+                "th": bool( everyday or weekday or re.search("\\bth($| |,|u)", self.date_string, re.IGNORECASE)),
+                "w":  bool( everyday or weekday or (re.search("\\bw($| |,|e)", self.date_string, re.IGNORECASE) and not weekend)), # Otherwise also searches weekend
+                "t":  bool( everyday or weekday or re.search("\\bt($| |,|u)", self.date_string, re.IGNORECASE)),
+                "m":  bool( everyday or weekday or re.search("\\bm($| |,|o)", self.date_string, re.IGNORECASE))
             }
 
         if not self.is_repeating:
