@@ -87,8 +87,10 @@ class HabiticaHelper:
 
         return 
 
+    def upload_checklist_item( self, task, checklist_id ):
+        resp = r.post("https://habitica.com/api/v3/tasks/%s/checklist" % checklist_id, headers=self.headers, data=task )
 
-
+        return
 
 
 
