@@ -4,7 +4,9 @@ class Item:
     def __init__( self, api, h_helper, item_id ):
         self.is_repeating = False
         self.is_checklist = False
+        self.indent = 1
         self.is_checklist_item = False
+        self.parent = item_id
         self.type = "todo"
 
         self.h_helper = h_helper
@@ -12,6 +14,8 @@ class Item:
 
         self.todoist_id = item_id
         self.habit_id = 0
+
+        self.task = {}
 
         self._update()
 
@@ -41,14 +45,30 @@ class Item:
 
         self._check_for_repeating()
 
-        self.task = {}
+        self.indent = _item["indent"]
 
+        #collapse 4 levels of indentation into 2
+
+        if _item["indent"] > 1:
+            self.is_checklist_item = True
+
+            parent = self.api.items.get_by_id( _item["parent_id"] )
+
+            while parent["indent"] > 1:
+                parent = self.api.items.get_by_id( parent["parent_id"] )
+
+            self.parent = parent["id"]
+
+        self._update_task()
+
+    def _update_task( self ):
         self.task["text"] = self.content
         self.task["date"] = self.h_helper.date_t_to_h( self.due_date )
         self.task["tags"] = self.tags
         self.task["completed"] = self.completed
         self.task["type"] = self.type
         self.task["dateCreated"] = self.creation_date
+
 
     def _check_for_repeating( self ):
         self.type = "todo"
@@ -131,6 +151,7 @@ class Item:
         self.task = self.h_helper.download_task( self.habit_id )
 
     def sync_to_habitrpg( self ):
+        self._update_task()
         if self.habit_id == 0:
             self.habit_id = self.h_helper.upload_task( self.task )
         else:
