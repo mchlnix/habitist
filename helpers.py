@@ -92,6 +92,9 @@ class HabiticaHelper:
 
         return
 
+    def score_task( self, habit_id, direction="up" ):
+        resp = r.post("https://habitica.com/api/v3/tasks/%s/score/%s" % (habit_id, direction), headers=self.headers )
+
 
 
 
