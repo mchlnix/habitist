@@ -75,12 +75,12 @@ class HabiticaHelper:
     def update_task( self, habit_id, task ):
         resp = r.put( "https://habitica.com/api/v3/tasks/" + str(habit_id), headers=self.headers, json=task )
 
-        return resp.json()[data]
+        return resp.json()["data"]
 
     def download_task( self, habit_id ):
         resp = r.get( "https://habitica.com/api/v3/tasks/" + str(habit_id), headers=self.headers )
 
-        return resp.json()[data]
+        return resp.json()["data"]
 
     def delete_task( self, habit_id ):
         resp = r.delete( "https://habitica.com/api/v3/tasks/" + str(habit_id), headers=self.headers )
