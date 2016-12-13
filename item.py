@@ -1,20 +1,20 @@
 import re
 
 class Item:
-    def __init__( self, api, h_helper, item_id ):
+    def __init__( self, api, h_helper, t_id, h_id=0 ):
         self.is_repeating = False
         self.is_checklist = False
         self.indent = 1
         self.is_checklist_item = False
-        self.parent = item_id
+        self.parent = t_id
         self.type = "todo"
         self.repeats_on = {}
 
         self.h_helper = h_helper
         self.api = api
 
-        self.todoist_id = item_id
-        self.habit_id = 0
+        self.todoist_id = t_id
+        self.habit_id = h_id
 
         self.task = {}
 
@@ -157,10 +157,27 @@ class Item:
         self._update_task()
         if self.habit_id == 0:
             self.habit_id = self.h_helper.upload_task( self.task )
-        else:
-            self._update()
+            return
 
-            self.h_helper.update_task( self.habit_id, self.task )
+        self._update()
+
+        task = self.h_helper.download_task( self.habit_id )
+
+        if self.task["completed"] and not task["completed"]: # normal todos completed
+            self.h_helper.score_task( self.habit_id )
+        elif self.is_repeating:
+            if self.task["type"] == "daily": # dailies will renew themselves?
+                pass
+            #    self.h_helper.score_task( self.habit_id ) # score and mark it done
+            elif self.task["date"] != task["date"]: # TODO actually compare them with >
+                self.habit_id = self.h_helper.upload_task( self.task ) # make new task and associate it
+                self.h_helper.score_task( self.habit_id ) # score and mark it done
+            else:
+                self.h_helper.update_task( self.habit_id, self.task ) # just update the task
+
+
+        else:
+            self.h_helper.update_task( self.habit_id, self.task ) # just update the task
 
     def delete_from_habitrpg( self ):
         if self.habit_id == 0:
