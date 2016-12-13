@@ -65,6 +65,7 @@ class Item:
     def _update_task( self ):
         self.task["text"] = self.content
         self.task["date"] = self.h_helper.date_t_to_h( self.due_date )
+        self.task["startDate"] = self.h_helper.date_t_to_h( self.due_date )
         self.task["tags"] = self.tags
         self.task["completed"] = self.completed
         self.task["type"] = self.type
