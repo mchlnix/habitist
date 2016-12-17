@@ -4,11 +4,10 @@ class Item:
     def __init__( self, api, h_helper, t_id, h_id=0 ):
         self.is_repeating = False
         self.is_checklist = False
-        self.indent = 1
         self.is_checklist_item = False
+
+        self.indent = 1
         self.parent = t_id
-        self.type = "todo"
-        self.repeats_on = {}
 
         self.h_helper = h_helper
         self.api = api
@@ -17,6 +16,8 @@ class Item:
         self.habit_id = h_id
 
         self.task = {}
+        self.type = "todo"
+        self.repeats_on = {}
 
         self._update()
 
