@@ -186,4 +186,5 @@ class Item:
             return
 
         self.h_helper.delete_task( self.habit_id )
+        self.habit_id = 0
 
