@@ -73,6 +73,44 @@ class Item:
         self.task["dateCreated"] = self.creation_date
         self.task["repeat"] = self.repeats_on
 
+    def sync_with_habitrpg( self ):
+        if habitrpg == 0:
+            return
+
+        self.task = self.h_helper.download_task( self.habit_id )
+
+    def sync_to_habitrpg( self ):
+        self._update_task()
+        if self.habit_id == 0:
+            self.habit_id = self.h_helper.upload_task( self.task )
+            return
+
+        self._update_from_todoist()
+
+        task = self.h_helper.download_task( self.habit_id )
+
+        if self.task["completed"] and not task["completed"]: # normal todos completed
+            self.h_helper.score_task( self.habit_id )
+        elif self.is_repeating:
+            if self.task["type"] == "daily": # dailies will renew themselves?
+                pass
+            #    self.h_helper.score_task( self.habit_id ) # score and mark it done
+            elif self.task["date"] != task["date"]: # TODO actually compare them with >
+                self.habit_id = self.h_helper.upload_task( self.task ) # make new task and associate it
+                self.h_helper.score_task( self.habit_id ) # score and mark it done
+            else:
+                self.h_helper.update_task( self.habit_id, self.task ) # just update the task
+
+
+        else:
+            self.h_helper.update_task( self.habit_id, self.task ) # just update the task
+
+    def delete_from_habitrpg( self ):
+        if self.habit_id == 0:
+            return
+
+        self.h_helper.delete_task( self.habit_id )
+        self.habit_id = 0
 
     def _check_for_repeating( self ):
         self.type = "todo"
@@ -148,43 +186,3 @@ class Item:
 
         if not self.is_repeating:
             print( self.content + " did not match anything with " + self.date_string )
-
-    def sync_with_habitrpg( self ):
-        if habitrpg == 0:
-            return
-
-        self.task = self.h_helper.download_task( self.habit_id )
-
-    def sync_to_habitrpg( self ):
-        self._update_task()
-        if self.habit_id == 0:
-            self.habit_id = self.h_helper.upload_task( self.task )
-            return
-
-        self._update_from_todoist()
-
-        task = self.h_helper.download_task( self.habit_id )
-
-        if self.task["completed"] and not task["completed"]: # normal todos completed
-            self.h_helper.score_task( self.habit_id )
-        elif self.is_repeating:
-            if self.task["type"] == "daily": # dailies will renew themselves?
-                pass
-            #    self.h_helper.score_task( self.habit_id ) # score and mark it done
-            elif self.task["date"] != task["date"]: # TODO actually compare them with >
-                self.habit_id = self.h_helper.upload_task( self.task ) # make new task and associate it
-                self.h_helper.score_task( self.habit_id ) # score and mark it done
-            else:
-                self.h_helper.update_task( self.habit_id, self.task ) # just update the task
-
-
-        else:
-            self.h_helper.update_task( self.habit_id, self.task ) # just update the task
-
-    def delete_from_habitrpg( self ):
-        if self.habit_id == 0:
-            return
-
-        self.h_helper.delete_task( self.habit_id )
-        self.habit_id = 0
-
