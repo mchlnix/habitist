@@ -19,9 +19,9 @@ class Item:
         self.type = "todo"
         self.repeats_on = {}
 
-        self._update()
+        self._update_from_todoist()
 
-    def _update( self ):
+    def _update_from_todoist( self ):
         _item = self.api.items.get_by_id(self.todoist_id)
 
         self.content       = _item["content"]
@@ -161,7 +161,7 @@ class Item:
             self.habit_id = self.h_helper.upload_task( self.task )
             return
 
-        self._update()
+        self._update_from_todoist()
 
         task = self.h_helper.download_task( self.habit_id )
 
