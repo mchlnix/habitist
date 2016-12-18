@@ -3,6 +3,19 @@ import helpers
 
 import todoist
 
+import json
+import sys
+import os
+
+PATH=os.path.expanduser("~/.config")
+
+if not PATH:
+    print "How come you have no .config directory in your USER directory?"
+    print PATH
+    sys.exit(1)
+else:
+    PATH+="/habitist.data"
+
 class ItemManager:
     def __init__( self, h_api_user, h_api_key, t_api ):
         self.item_list = {}
@@ -13,14 +26,31 @@ class ItemManager:
 
         self.habit = helpers.HabiticaHelper( h_api_user, h_api_key )
 
+        temp = self._load_config()
+
         for _item in self.api.items.all():
-            self.item_list[_item["id"]] = item.Item( self.api, self.habit, _item["id"] )
+            if str(_item["id"]).decode("utf-8") in temp.keys():
+                self.item_list[_item["id"]] = item.Item( self.api, self.habit, _item["id"], temp[str(_item["id"]).decode("utf-8")] )
+            else:
+                self.item_list[_item["id"]] = item.Item( self.api, self.habit, _item["id"] )
 
     def _load_config( self ):
-        pass
+        try:
+            with open( PATH, "r" ) as save_file:
+                temp = json.load( save_file )
+        except IOError:
+            temp = {}
+
+        return temp
 
     def _save_config( self ):
-        pass
+        temp = {}
+
+        for key in self.item_list.keys():
+            temp[key] = self.item_list[key].habit_id
+
+        with open( PATH, "w+" ) as save_file:
+            json.dump( temp, save_file )
 
     def upload_to_habit( self ):
 
@@ -36,7 +66,7 @@ class ItemManager:
             if _item.indent == 1:
                 continue
 
-            self.habit.upload_checklist_item( {"text": _item.content }, self.item_list[_item.parent].habit_id )
+        self._save_config()
 
     def delete_all( self ):
         for _item in self.item_list.values():
@@ -44,5 +74,7 @@ class ItemManager:
                 continue
 
             _item.delete_from_habitrpg()
+
+        self._save_config()
 
 
