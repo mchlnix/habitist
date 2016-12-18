@@ -59,12 +59,22 @@ class ItemManager:
         for _item in self.item_list.values():
             if _item.indent > 1:
                 continue
-
-            _item.sync_to_habitrpg()
+            try:
+                _item.sync_to_habitrpg()
+            except Exception as e:
+                print str(e)
+                print "Failed syncing item: %s" % _item.content
+                print "completed: %s" % _item.completed
+                return
 
         for _item in self.item_list.values():
             if _item.indent == 1:
                 continue
+            try:
+                self.habit.upload_checklist_item( {"text": _item.content }, self.item_list[_item.parent].habit_id )
+            except:
+                print "Failed uploading checklist item: %s" % _item.content
+                return
 
         self._save_config()
 
