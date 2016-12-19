@@ -47,11 +47,11 @@ class Item:
 
         self._check_for_repeating()
 
-        self.indent = _item["indent"]
-
         #collapse 4 levels of indentation into 2
 
-        if _item["indent"] > 1:
+        if _item["indent"] > 1 and _item["parent_id"]:
+            self.indent = _item["indent"]
+
             self.is_checklist_item = True
 
             parent = self.api.items.get_by_id( _item["parent_id"] )
