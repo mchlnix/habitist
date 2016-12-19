@@ -97,9 +97,24 @@ class HabiticaHelper:
 
 
 
+    def checklist_item_is_uploaded( self, item_id, parent_id ):
+        task = self.download_task( parent_id )
+
+        if task:
+            for child in task["children"]:
+                if child["id"] == habit_id:
+                    return True
+
+        return False
 
 
 
+    '''
+    Checks if a task is uploaded as a task. Note: check does not work for 
+    checklist items. Use checklist_item_is_uploaded, instead.
 
-
+    Returns boolean. True if it is uploaded.
+    '''
+    def task_is_uploaded( self, habit_id ):
+        return bool( self.download_task( habit_id ) )
 
