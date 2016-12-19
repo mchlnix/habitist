@@ -128,3 +128,6 @@ class HabiticaHelper:
     def task_is_uploaded( self, habit_id ):
         return bool( self.download_task( habit_id ) )
 
+    def score_checklist_item( self, item_id, parent_id ):
+        resp = r.post( "https://habitica.com/api/v3/tasks/%s/checklist/%s/score" % (parent_id, item_id), headers=self.headers )
+
