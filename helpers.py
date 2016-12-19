@@ -90,7 +90,12 @@ class HabiticaHelper:
     def upload_checklist_item( self, task, checklist_id ):
         resp = r.post("https://habitica.com/api/v3/tasks/%s/checklist" % checklist_id, headers=self.headers, json=task )
 
-        return
+        try:
+           return resp.json()["data"]["checklist"][-1]["id"]
+        except KeyError:
+            print resp.json()
+
+        return "0"
 
     def score_task( self, habit_id, direction="up" ):
         resp = r.post("https://habitica.com/api/v3/tasks/%s/score/%s" % (habit_id, direction), headers=self.headers )
