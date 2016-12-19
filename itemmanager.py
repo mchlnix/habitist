@@ -22,9 +22,12 @@ class ItemManager:
 
         self.api = todoist.TodoistAPI( t_api )
 
-        self.api.sync()
-
         self.habit = helpers.HabiticaHelper( h_api_user, h_api_key )
+
+        self.update()
+
+    def update( self ):
+        self.api.sync()
 
         temp = self._load_config()
 
