@@ -161,13 +161,11 @@ class Item:
 
         # get yearlies
         if self.date_string == "yearly" or self.date_string == "every year" or re.match( yrly_re, self.date_string ):
-            print( self.content + " is yearly with " + self.date_string )
             self.is_repeating = True
             return
 
         # get monthlies
         if self.date_string == "monthly" or self.date_string == "every month" or re.match(mthly_re, self.date_string ):
-            print( self.content + " is monthly with " + self.date_string )
             self.is_repeating = True
             return
 
@@ -177,8 +175,6 @@ class Item:
         needToParse = re.match( "^ev(ery)? [^\d]", self.date_string, re.IGNORECASE) or self.date_string == "daily"
 
         if needToParse and noStartDate:
-            print( self.content + " is daily/weekly with " + self.date_string )
-
             self.type = 'daily'
             self.is_repeating = True
 
@@ -197,4 +193,4 @@ class Item:
             }
 
         if not self.is_repeating:
-            print( self.content + " did not match anything with " + self.date_string )
+            pass
