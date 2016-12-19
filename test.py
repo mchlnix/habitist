@@ -16,7 +16,7 @@ habit_api_key   = "cddfbde9-5e50-407f-baa9-8c2ccb8e7506"
 
 manager = itemmanager.ItemManager( habit_api_user, habit_api_key, todoist_api_key )
 
-print( "Syncing with habitrpg", end="" )
+print( "Syncing with habitrpg" )
 
 manager.upload_to_habit()
 
