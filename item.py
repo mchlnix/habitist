@@ -90,9 +90,13 @@ class Item:
 
         if habit_task["completed"]:
             if not self.task["completed"]: # was uncompleted on todoist?
-                self.h_helper.score_task( self.habit_id, direction="down" )
+                if not self.type == "daily": # see issue #1
+                    self.h_helper.score_task( self.habit_id, direction="down" )
+                else:
+                    self.task.pop( "startDate" )
 
             self.h_helper.update_task( self.habit_id, self.task )
+
             return
 
         if not habit_task["completed"]:
