@@ -30,12 +30,23 @@ class Item:
         self.collapsed     = _item["collapsed"]
         self.priority      = _item["priority"]
         self.completed     = _item["checked"] == 1
-        self.date_string   = _item["date_string"].lower()
+        if _item["date_string"]:
+            self.date_string   = _item["date_string"].lower()
+        else:
+            self.date_string = ""
 
-        self.tags = [ self.h_helper.get_tag_id_by_name( "p:" + self.api.projects.get_by_id(_item["project_id"])["name"]) ]
+        self.tags = []
+
+        try:
+            self.tags = [ self.h_helper.get_tag_id_by_name( "p:" + self.api.projects.get_by_id(_item["project_id"])["name"]) ]
+        except AttributeError:
+            print( "Old project was found and skipped, %s" % _item["project_id"] )
 
         for label in _item["labels"]:
-            self.tags += [ self.h_helper.get_tag_by_id( self.api.labels.get_by_id(label) ) ]
+            try:
+                self.tags += [ self.h_helper.get_tag_id_by_name( self.api.labels.get_by_id(label)["name"] ) ]
+            except AttributeError: # issue #10
+                print( "Old label was found, %i" % label )
 
         # self.notes = ""
 
