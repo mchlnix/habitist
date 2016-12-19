@@ -131,3 +131,19 @@ class HabiticaHelper:
     def score_checklist_item( self, item_id, parent_id ):
         resp = r.post( "https://habitica.com/api/v3/tasks/%s/checklist/%s/score" % (parent_id, item_id), headers=self.headers )
 
+    def checklist_item_is_completed( self, item_id, parent_id ):
+        if parent_id == "0" or item_id == "0":
+            return False
+
+        task = self.download_task( parent_id )
+
+        try:
+            if task:
+                for child in reversed(task["checklist"]):
+                    if child["id"] == item_id:
+                        print child["completed"]
+                        return child["completed"]
+        except KeyError:
+            print task
+
+        return False
