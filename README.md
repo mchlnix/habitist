@@ -19,6 +19,20 @@ On the short list:
 - Bug Fixes?
 
 Sometime, maybe:
+- Check if it works with Windows
 - Notes into comments
 - Special labels for attributes
 - Priorities as difficulty?
+
+##INSTALL
+
+Only tested on Linux.
+
+You'll need:
+- Python
+- [The Python requests library](https://pypi.python.org/pypi/requests) `pip install requests`
+- [The Todoist Python API](https://developer.todoist.com/#client-libraries) `pip install todoist-python`
+
+Just drop the files in a directory of your choice, change the testing API keys to your own and run it.
+
+It runs in a continuous loop with a 30 second break. Cancel by Ctrl+C.
