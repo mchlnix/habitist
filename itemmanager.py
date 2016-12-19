@@ -77,7 +77,7 @@ class ItemManager:
                 print str(e)
                 print "Failed uploading checklist item: %s" % _item.content
 
-            if _item.completed and not self.habit.checklist_item_is_completed( _item.habit_id, self.item_list[_item.parent].habit_id): #no support for repeating subtasks
+            if _item.completed != self.habit.checklist_item_is_completed( _item.habit_id, self.item_list[_item.parent].habit_id): #no support for repeating subtasks
                 self.habit.score_checklist_item( _item.habit_id, self.item_list[_item.parent].habit_id )
 
         self._save_config()

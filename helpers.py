@@ -141,7 +141,6 @@ class HabiticaHelper:
             if task:
                 for child in reversed(task["checklist"]):
                     if child["id"] == item_id:
-                        print child["completed"]
                         return child["completed"]
         except KeyError:
             print task
