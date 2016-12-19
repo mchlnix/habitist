@@ -101,14 +101,17 @@ class HabiticaHelper:
         resp = r.post("https://habitica.com/api/v3/tasks/%s/score/%s" % (habit_id, direction), headers=self.headers )
 
 
-
     def checklist_item_is_uploaded( self, item_id, parent_id ):
         task = self.download_task( parent_id )
 
-        if task:
-            for child in task["children"]:
-                if child["id"] == habit_id:
-                    return True
+        try:
+            if task:
+                for child in reversed(task["checklist"]):
+                    print "%s == %s" % (child["id"], item_id)
+                    if child["id"] == item_id:
+                        return True
+        except KeyError:
+            print task
 
         return False
 
