@@ -11,9 +11,9 @@ Supports:
 - Daily and weekly tasks as dailies with streak support
 - Labels as tags
 - Projects as special `p:project_name` tags
+- Subtasks as checklist items
 
 On the short list:
-- Make Subtasks as checklist items work
 - Make an easy to use program out of it
 
 Sometime, maybe:
