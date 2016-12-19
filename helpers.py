@@ -102,12 +102,14 @@ class HabiticaHelper:
 
 
     def checklist_item_is_uploaded( self, item_id, parent_id ):
+        if parent_id == "0" or item_id == "0":
+            return False
+
         task = self.download_task( parent_id )
 
         try:
             if task:
                 for child in reversed(task["checklist"]):
-                    print "%s == %s" % (child["id"], item_id)
                     if child["id"] == item_id:
                         return True
         except KeyError:
