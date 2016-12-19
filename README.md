@@ -1,6 +1,8 @@
 # habitist
 
-Syncs your todoist tasks to habitRPG
+`habitist.py -ta TODOIST_API_KEY -hu HABITRPG_API_USER -hk HABITRPG_API_KEY`
+
+Syncs your todoist tasks to HabitRPG
 
 ----------------
 
@@ -14,7 +16,7 @@ Supports:
 - Subtasks as checklist items
 
 On the short list:
-- Make an easy to use program out of it
+- Bug Fixes?
 
 Sometime, maybe:
 - Notes into comments
