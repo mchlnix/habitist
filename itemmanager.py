@@ -71,10 +71,11 @@ class ItemManager:
             if _item.indent == 1:
                 continue
             try:
-                self.habit.upload_checklist_item( {"text": _item.content }, self.item_list[_item.parent].habit_id )
-            except:
+                if not self.habit.checklist_item_is_uploaded( _item.habit_id, self.item_list[_item.parent].habit_id ):
+                    _item.habit_id = self.habit.upload_checklist_item( {"text": _item.content }, self.item_list[_item.parent].habit_id )
+            except Exception as e:
+                print str(e)
                 print "Failed uploading checklist item: %s" % _item.content
-                return
 
         self._save_config()
 
