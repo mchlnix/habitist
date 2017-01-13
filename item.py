@@ -139,6 +139,10 @@ class Item:
         self.type = "todo"
         self.repeats_on = {}
 
+        year_strings  = ["yearly", "every year"]
+        month_strings = ["monthly", "every month"]
+        day_strings   = ["daily", "every day", "ev day" ]
+
         if not self.date_string:
             self.is_repeating = False
             return
@@ -154,13 +158,20 @@ class Item:
         # build the regex for yearly tasks
         ev_yrly  = "(yearly|ev(ery)?( year)?)"
         ev_mthly = "(monthly|ev(ery)?( month)?)"
+        ev_daily = "(daily|(ev(ery)?( day)?))"
         on       = "( on)?"
         the_xth  = "(( the)? \\d+(st|nd|rd|th)?)"
         of       = "( of)?"
         month    = "( (jan(uary)?|feb(ruary)?|mar(ch)?|apr(il)?|may|jun(e)?" + \
         "|jul(y)?|aug(ust)?|sep(t)?(ember)?|oct(ober)?|nov(ember)?|dec(ember)?))"
-        day      = "( mon(day)?|tue(s(day)?)?|wed(nesday)?|thu(r(s(day)?)?)?" + \
-                   "|fri(day)?|sat(urday)?|sun(day)?)"
+        monday   = "mon(day)?"
+        tuesday  = "tue(s(day)?)?"
+        wednesday = "wed(nesday)?"
+        thursday = "thu(r(s(day)?)?)?"
+        friday   = "fri(day)?"
+        saturday = "sat(urday)?"
+        sunday   = "sun(day)?"
+        day      = "(%s|%s|%s|%s|%s|%s|%s)" % (monday, tuesday, wednesday, thursday, friday, saturday, sunday)
         re_or    = "|"
         decimals = " \d+"
         stop     = "$"
@@ -168,40 +179,35 @@ class Item:
         yrly_re = re.compile(ev_yrly + on + the_xth + "?" + of + month + the_xth + "?" + re_or + ev_yrly + decimals + stop, re.IGNORECASE ) # https://regex101.com/r/xUnNAT/10
 
         # build the regex for monthly tasks
-        mthly_re = re.compile( ev_mthly + "(" + on + the_xth + day + "?" + re_or + day + the_xth+ ")"); # https://regex101.com/r/UoiLVm/5
+        mthly_re = re.compile( ev_mthly + "(" + on + the_xth + day + "?" + re_or + day + "?" + the_xth+ ")"); # https://regex101.com/r/UoiLVm/5
+
+        daily_re = re.compile( ev_daily + " (" + day + re_or + "weekday|weekend|day" + ")" )
 
         # get yearlies
-        if self.date_string == "yearly" or self.date_string == "every year" or re.match( yrly_re, self.date_string ):
+        if self.date_string in year_strings or re.match( yrly_re, self.date_string ):
             self.is_repeating = True
             return
 
         # get monthlies
-        if self.date_string == "monthly" or self.date_string == "every month" or re.match(mthly_re, self.date_string ):
+        if self.date_string in month_strings or re.match(mthly_re, self.date_string ):
             self.is_repeating = True
             return
 
         # get dailies TODO  renew!
-        noStartDate = not re.match( "(after|starting|last|\d+(st|nd|rd|th)|(first|second|third))", self.date_string, re.IGNORECASE )
-
-        needToParse = re.match( "^ev(ery)? [^\d]", self.date_string, re.IGNORECASE) or self.date_string == "daily"
-
-        if needToParse and noStartDate:
-            self.type = 'daily'
+        if self.date_string in day_strings or re.match(daily_re, self.date_string ):
             self.is_repeating = True
-
-            everyday = bool( re.match("^ev(ery)? [^(week)]?(?:day|night)", self.date_string, re.IGNORECASE) or self.date_string == "daily")
-            weekday = bool(re.match("^ev(ery)? (week)?day", self.date_string, re.IGNORECASE))
-            weekend = bool(re.match("^ev(ery)? (week)?end", self.date_string, re.IGNORECASE))
-
+            self.type = "daily"
+            everyday = self.date_string in day_strings
+            weekend = re.match( ev_daily + " weekend", self.date_string )
+            weekday = re.match( ev_daily + " weekday", self.date_string )
             self.repeats_on = {
-                "su": bool( everyday or weekend or re.search("\\bs($| |,|u)", self.date_string, re.IGNORECASE )),
-                "s":  bool( everyday or weekend or re.search("\\bsa($| |,|t)", self.date_string, re.IGNORECASE)),
-                "f":  bool( everyday or weekday or re.search("\\bf($| |,|r)", self.date_string, re.IGNORECASE)),
-                "th": bool( everyday or weekday or re.search("\\bth($| |,|u)", self.date_string, re.IGNORECASE)),
-                "w":  bool( everyday or weekday or (re.search("\\bw($| |,|e)", self.date_string, re.IGNORECASE) and not weekend)), # Otherwise also searches weekend
-                "t":  bool( everyday or weekday or re.search("\\bt($| |,|u)", self.date_string, re.IGNORECASE)),
-                "m":  bool( everyday or weekday or re.search("\\bm($| |,|o)", self.date_string, re.IGNORECASE))
+                "su": bool( everyday or weekend or re.search(sunday, self.date_string, re.IGNORECASE )),
+                "s":  bool( everyday or weekend or re.search(saturday, self.date_string, re.IGNORECASE)),
+                "f":  bool( everyday or weekday or re.search(friday, self.date_string, re.IGNORECASE)),
+                "th": bool( everyday or weekday or re.search(thursday, self.date_string, re.IGNORECASE)),
+                "w":  bool( everyday or weekday or re.search(wednesday, self.date_string, re.IGNORECASE)),
+                "t":  bool( everyday or weekday or re.search(tuesday, self.date_string, re.IGNORECASE)),
+                "m":  bool( everyday or weekday or re.search(monday, self.date_string, re.IGNORECASE))
             }
+            return
 
-        if not self.is_repeating:
-            pass
