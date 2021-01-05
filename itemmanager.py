@@ -10,8 +10,8 @@ import os
 PATH=os.path.expanduser("~/.config")
 
 if not PATH:
-    print "How come you have no .config directory in your USER directory?"
-    print PATH
+    print("How come you have no .config directory in your USER directory?")
+    print(PATH)
     sys.exit(1)
 else:
     PATH+="/habitist.data"
@@ -30,12 +30,12 @@ class ItemManager:
         self.api.sync()
 
         temp = self._load_config()
-
         for _item in self.api.items.all():
-            if str(_item["id"]).decode("utf-8") in temp.keys():
-                self.item_list[_item["id"]] = item.Item( self.api, self.habit, _item["id"], temp[str(_item["id"]).decode("utf-8")] )
-            else:
-                self.item_list[_item["id"]] = item.Item( self.api, self.habit, _item["id"] )
+            if _item['due']:
+                if str(_item["id"]) in temp.keys():
+                    self.item_list[_item["id"]] = item.Item( self.api, self.habit, _item["id"], temp[str(_item["id"])] )
+                else:
+                    self.item_list[_item["id"]] = item.Item( self.api, self.habit, _item["id"] )
 
     def _load_config( self ):
         try:
@@ -65,9 +65,12 @@ class ItemManager:
             try:
                 _item.sync_to_habitrpg()
             except Exception as e:
-                print str(e)
-                print "Failed syncing item: %s" % _item.content
-                print "completed: %s" % _item.completed
+                print('error')
+                print(e)
+
+                print( "Failed syncing item: %s" % _item.content)
+                
+                print( "completed: %s" % _item.completed)
                 return
 
         for _item in self.item_list.values():
@@ -77,8 +80,8 @@ class ItemManager:
                 if not self.habit.checklist_item_is_uploaded( _item.habit_id, self.item_list[_item.parent].habit_id ):
                     _item.habit_id = self.habit.upload_checklist_item( {"text": _item.content }, self.item_list[_item.parent].habit_id )
             except Exception as e:
-                print str(e)
-                print "Failed uploading checklist item: %s" % _item.content
+                print( str(e))
+                print( "Failed uploading checklist item: %s" % _item.content)
 
             if _item.completed != self.habit.checklist_item_is_completed( _item.habit_id, self.item_list[_item.parent].habit_id): #no support for repeating subtasks
                 self.habit.score_checklist_item( _item.habit_id, self.item_list[_item.parent].habit_id )

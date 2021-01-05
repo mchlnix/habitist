@@ -54,7 +54,7 @@ while True:
 
     print("Syncing complete" )
 
-    for seconds in xrange(time_to_sleep):
+    for seconds in range(time_to_sleep):
         print( "\rSleeping %i seconds" % (time_to_sleep - seconds), end="")
         time.sleep(1)
     print( "\rSlept for %i seconds", seconds)

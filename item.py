@@ -26,14 +26,18 @@ class Item:
 
         self.content       = _item["content"]
         self.creation_date = _item["date_added"]
-        self.due_date      = _item["due_date_utc"]
+        self.due_date      = _item["due"]
         self.collapsed     = _item["collapsed"]
         self.priority      = _item["priority"]
         self.completed     = _item["checked"] == 1
-        if _item["date_string"]:
-            self.date_string   = _item["date_string"].lower()
+        if 'date_string' in _item:
+            if _item["date_string"]:
+                self.date_string   = _item["date_string"].lower()
+            else:
+                self.date_string = ""
         else:
             self.date_string = ""
+
 
         self.tags = []
 
@@ -59,18 +63,18 @@ class Item:
         self._check_for_repeating()
 
         #collapse 4 levels of indentation into 2
+        if 'indent' in _item:
+            if _item["indent"] > 1 and _item["parent_id"]:
+                self.indent = _item["indent"]
 
-        if _item["indent"] > 1 and _item["parent_id"]:
-            self.indent = _item["indent"]
+                self.is_checklist_item = True
 
-            self.is_checklist_item = True
+                parent = self.api.items.get_by_id( _item["parent_id"] )
 
-            parent = self.api.items.get_by_id( _item["parent_id"] )
+                while parent["indent"] > 1:
+                    parent = self.api.items.get_by_id( parent["parent_id"] )
 
-            while parent["indent"] > 1:
-                parent = self.api.items.get_by_id( parent["parent_id"] )
-
-            self.parent = parent["id"]
+                self.parent = parent["id"]
 
         self._update_task()
 
@@ -92,13 +96,13 @@ class Item:
 
     def sync_to_habitrpg( self ):
         self._update_from_todoist()
-
+        print(self.habit_id)
         if self.habit_id == 0:
             self.habit_id = self.h_helper.upload_task( self.task )
             return
 
         habit_task = self.h_helper.download_task( self.habit_id )
-
+        print(habit_task)
         if habit_task["completed"]:
             if not self.task["completed"]: # was uncompleted on todoist?
                 if not self.type == "daily": # see issue #1
