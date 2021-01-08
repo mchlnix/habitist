@@ -28,7 +28,7 @@ class ItemManager:
 
     def update( self ):
         self.api.sync()
-
+        
         temp = self._load_config()
         for _item in self.api.items.all():
             if _item['due']:
@@ -58,18 +58,17 @@ class ItemManager:
     def upload_to_habit( self ):
 
         # upload todos and checklists first
-
+        import traceback
         for _item in self.item_list.values():
             if _item.indent > 1:
                 continue
             try:
                 _item.sync_to_habitrpg()
             except Exception as e:
-                print('error')
+                traceback.print_exc()
                 print(e)
-
-                print( "Failed syncing item: %s" % _item.content)
-                
+                print(_item)
+                print( "Failed syncing item: %s" % _item.content) 
                 print( "completed: %s" % _item.completed)
                 return
 

@@ -23,13 +23,24 @@ class Item:
 
     def _update_from_todoist( self ):
         _item = self.api.items.get_by_id(self.todoist_id)
-
+        self.priority      = _item["priority"]
+        self.parent_id     = _item["parent_id"]
         self.content       = _item["content"]
         self.creation_date = _item["date_added"]
         self.due_date      = _item["due"]
         self.collapsed     = _item["collapsed"]
         self.priority      = _item["priority"]
         self.completed     = _item["checked"] == 1
+        self.habit_priority=float(self.priority)/2
+        if self.habit_priority==0.5:
+            self.habit_priority='0.1'
+        elif self.habit_priority==1:
+            self.habit_priority='1'
+        elif self.habit_priority==1.5:
+            self.habit_priority='1.5'
+        elif self.habit_priority==2:
+            self.habit_priority='2'
+
         if 'date_string' in _item:
             if _item["date_string"]:
                 self.date_string   = _item["date_string"].lower()
@@ -87,6 +98,7 @@ class Item:
         self.task["type"] = self.type
         self.task["dateCreated"] = self.creation_date
         self.task["repeat"] = self.repeats_on
+        self.task["priority"]=self.habit_priority
 
     def sync_with_habitrpg( self ):
         if habitrpg == 0:
@@ -96,13 +108,11 @@ class Item:
 
     def sync_to_habitrpg( self ):
         self._update_from_todoist()
-        print(self.habit_id)
         if self.habit_id == 0:
             self.habit_id = self.h_helper.upload_task( self.task )
             return
 
         habit_task = self.h_helper.download_task( self.habit_id )
-        print(habit_task)
         if habit_task["completed"]:
             if not self.task["completed"]: # was uncompleted on todoist?
                 if not self.type == "daily": # see issue #1

@@ -61,11 +61,14 @@ class HabiticaHelper:
                    "May": "05", "Jun": "06", "Jul": "07", "Aug": "08",
                    "Sep": "09", "Oct": "10", "Nov": "11", "Dec": "12"}
         _l = date_string['date'].split("-")
-
+        time = _l[2].split('T')
         year  = _l[0]
-        day   = _l[2]
+        day   = time[0]
         month = _l[1]
-        time  = '23:00:00'
+        if len(time)>1:
+            time  = time[1]
+        else:
+            time = "23:59:59"
 
         return "{}-{}-{}T{}.000Z".format( year, month, day, time)
 

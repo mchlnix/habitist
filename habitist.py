@@ -9,7 +9,7 @@ import sys
 
 import itemmanager
 
-time_to_sleep = 30
+time_to_sleep = 120
 
 def print_help():
     print( "habitist.py -ta TODOIST_API_KEY -hu HABITRPG_API_USER -hk HABITRPG_API_KEY" )
