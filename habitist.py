@@ -9,7 +9,7 @@ import sys
 
 import itemmanager
 
-time_to_sleep = 30
+time_to_sleep = 120
 
 def print_help():
     print( "habitist.py -ta TODOIST_API_KEY -hu HABITRPG_API_USER -hk HABITRPG_API_KEY" )
@@ -54,7 +54,7 @@ while True:
 
     print("Syncing complete" )
 
-    for seconds in xrange(time_to_sleep):
+    for seconds in range(time_to_sleep):
         print( "\rSleeping %i seconds" % (time_to_sleep - seconds), end="")
         time.sleep(1)
     print( "\rSlept for %i seconds", seconds)

@@ -42,8 +42,10 @@ class HabiticaHelper:
     Returns the task id.
     '''
     def upload_task( self, task ):
+        print(task)
+        print(self.headers)
         resp = r.post( "https://habitica.com/api/v3/tasks/user", headers=self.headers, json=task )
-
+        print(resp.__dict__) 
         return resp.json()["data"]["id"]
 
     '''
@@ -58,12 +60,15 @@ class HabiticaHelper:
         _months = {"Jan": "01", "Feb": "02", "Mar": "03", "Apr": "04",
                    "May": "05", "Jun": "06", "Jul": "07", "Aug": "08",
                    "Sep": "09", "Oct": "10", "Nov": "11", "Dec": "12"}
-        _l = date_string.split(" ")
-
-        year  = _l[3]
-        day   = _l[1]
-        month = _months[_l[2]]
-        time  = _l[4]
+        _l = date_string['date'].split("-")
+        time = _l[2].split('T')
+        year  = _l[0]
+        day   = time[0]
+        month = _l[1]
+        if len(time)>1:
+            time  = time[1]
+        else:
+            time = "23:59:59"
 
         return "{}-{}-{}T{}.000Z".format( year, month, day, time)
 
@@ -93,7 +98,7 @@ class HabiticaHelper:
         try:
            return resp.json()["data"]["checklist"][-1]["id"]
         except KeyError:
-            print resp.json()
+            print(resp.json())
 
         return "0"
 
@@ -113,7 +118,7 @@ class HabiticaHelper:
                     if child["id"] == item_id:
                         return True
         except KeyError:
-            print task
+            print(task)
 
         return False
 
@@ -143,6 +148,7 @@ class HabiticaHelper:
                     if child["id"] == item_id:
                         return child["completed"]
         except KeyError:
-            print task
+            print(task)
+
 
         return False
